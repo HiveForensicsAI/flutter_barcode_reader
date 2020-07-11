@@ -3,6 +3,8 @@ package de.mintware.barcode_scan
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.os.CountDownTimer
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import com.google.zxing.BarcodeFormat
@@ -10,6 +12,9 @@ import com.google.zxing.Result
 import me.dm7.barcodescanner.zxing.ZXingScannerView
 
 class BarcodeScannerActivity : Activity(), ZXingScannerView.ResultHandler {
+
+
+    var cTimer: CountDownTimer? = null
 
     init {
         title = ""
@@ -46,6 +51,7 @@ class BarcodeScannerActivity : Activity(), ZXingScannerView.ResultHandler {
         super.onCreate(savedInstanceState)
 
         config = Protos.Configuration.parseFrom(intent.extras!!.getByteArray(EXTRA_CONFIG))
+        startTimer();
     }
 
     private fun setupScannerView() {
@@ -100,9 +106,29 @@ class BarcodeScannerActivity : Activity(), ZXingScannerView.ResultHandler {
         return super.onOptionsItemSelected(item)
     }
 
+
+
     override fun onPause() {
         super.onPause()
         scannerView?.stopCamera()
+        cancelTimer();
+    }
+    fun startTimer() {
+        cTimer = object : CountDownTimer(10000, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                Log.d("OnTick","onTick");
+            }
+            override fun onFinish() {
+                Log.d("OnTick","Finish");
+                finish();
+            }
+        }
+        (cTimer as CountDownTimer).start()
+    }
+
+
+    fun cancelTimer() {
+        if (cTimer != null) cTimer!!.cancel()
     }
 
     override fun onResume() {
