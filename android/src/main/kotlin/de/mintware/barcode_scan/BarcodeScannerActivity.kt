@@ -1,17 +1,24 @@
 package de.mintware.barcode_scan
 
 import android.app.Activity
+import android.content.DialogInterface
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import androidx.appcompat.app.ActionBar
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.Result
 import me.dm7.barcodescanner.zxing.ZXingScannerView
 
-class BarcodeScannerActivity : Activity(), ZXingScannerView.ResultHandler {
+
+class BarcodeScannerActivity : AppCompatActivity(), ZXingScannerView.ResultHandler {
 
 
     var cTimer: CountDownTimer? = null
@@ -52,6 +59,7 @@ class BarcodeScannerActivity : Activity(), ZXingScannerView.ResultHandler {
 
         config = Protos.Configuration.parseFrom(intent.extras!!.getByteArray(EXTRA_CONFIG))
         startTimer();
+
     }
 
     private fun setupScannerView() {
@@ -75,6 +83,12 @@ class BarcodeScannerActivity : Activity(), ZXingScannerView.ResultHandler {
         }
 
         setContentView(scannerView)
+
+        val actionBar: ActionBar
+        actionBar = this!!.getSupportActionBar()!!
+        val colorDrawable = ColorDrawable(Color.parseColor("#313896"))
+        actionBar.setBackgroundDrawable(colorDrawable)
+        actionBar.setTitle("Spektrum")
     }
 
     // region AppBar menu
@@ -114,13 +128,22 @@ class BarcodeScannerActivity : Activity(), ZXingScannerView.ResultHandler {
         cancelTimer();
     }
     fun startTimer() {
-        cTimer = object : CountDownTimer(10000, 1000) {
+        cTimer = object : CountDownTimer(45000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 Log.d("OnTick","onTick");
             }
             override fun onFinish() {
                 Log.d("OnTick","Finish");
-                finish();
+                val dialogBuilder = AlertDialog.Builder(this@BarcodeScannerActivity)
+                dialogBuilder.setMessage("Cannot authenticate")
+                        .setCancelable(false)
+                        .setPositiveButton("OK", DialogInterface.OnClickListener {
+                            dialog, id ->
+                            finish();
+                        })
+                val alert = dialogBuilder.create()
+                alert.setTitle("Warning")
+                alert.show()
             }
         }
         (cTimer as CountDownTimer).start()
